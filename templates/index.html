@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crop Disease Prediction</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-align: center;
+            background-image: url('bg1.jpg');
+            background-size: cover;
+            background-repeat: no-repeat;
+            color: #fff;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            color: green;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+        }
+        form {
+            background: rgba(0, 128, 0, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            display: inline-block;
+        }
+        input, button {
+            display: block;
+            margin: 10px auto;
+            padding: 10px;
+            border-radius: 5px;
+            border: none;
+        }
+        button {
+            background-color: blue;
+            color: white;
+            cursor: pointer;
+            transition: 0.3s ease;
+        }
+        button:hover {
+            background-color: #C70039;
+        }
+        #result {
+            margin-top: 20px;
+            font-size: 1.5em;
+            color: black;
+        }
+    </style>
+</head>
+<body>
+    <h1>Crop Disease Prediction System</h1>
+    <form id="uploadForm" enctype="multipart/form-data">
+        <input type="text" name="state" id="state" placeholder="Enter State" required>
+        <input type="text" name="city" id="city" placeholder="Enter City" required>
+        <input type="file" name="file" id="file" accept="image/*" required>
+        <button type="submit">Upload and Predict</button>
+    </form>
+    <div id="result"></div>
+
+    <script>
+        document.getElementById("uploadForm").onsubmit = async function(event) {
+            event.preventDefault();
+
+            let formData = new FormData();
+            formData.append("state", document.getElementById("state").value);
+            formData.append("city", document.getElementById("city").value);
+            formData.append("file", document.getElementById("file").files[0]);
+
+            try {
+                let response = await fetch("/predict", {  // ✅ Fixed Route!
+                    method: "POST",
+                    body: formData
+                });
+
+                let data = await response.json();
+
+                if (data.error) {
+                    document.getElementById("result").innerHTML = `<b style="color:red;">Error:</b> ${data.error}`;
+                } else {
+                    document.getElementById("result").innerHTML = `
+                        <b>Prediction:</b> ${data.disease}<br>
+                        <b>Temperature:</b> ${data.temperature}°C<br>
+                        <b>Humidity:</b> ${data.humidity}%<br>
+                        <b>Preventive Measures:</b> ${data.preventive_measures}<br>
+                        <b>Treatment:</b> ${data.treatment}
+                    `;
+                }
+            } catch (error) {
+                document.getElementById("result").innerHTML = `<b style="color:red;">Error:</b> Failed to fetch response`;
+            }
+        };
+    </script>
+</body>
+</html>
